@@ -13,11 +13,13 @@ WORKFLOW_DIR="$SERVICES_DIR/${WORKFLOW_NAME}.workflow"
 # ── 1. Compile MDPreview.app ─────────────────────────────────────────────────
 
 echo "Building MDPreview.app..."
-APPLESCRIPT_TMP="$(mktemp /tmp/MDPreview_XXXXXX.applescript)"
-sed "s|MDPREVIEW_SH_PATH|$SCRIPT_DIR/md-preview.sh|g" \
-    "$SCRIPT_DIR/automator/MDPreview.applescript" > "$APPLESCRIPT_TMP"
-osacompile -o "$APP_DEST" "$APPLESCRIPT_TMP"
-rm -f "$APPLESCRIPT_TMP"
+osacompile -o "$APP_DEST" "$SCRIPT_DIR/automator/MDPreview.applescript"
+
+# Bundle scripts + vault-config so the app is self-contained (no path injection needed)
+mkdir -p "$APP_DEST/Contents/Resources"
+cp "$SCRIPT_DIR/md-preview.sh" "$APP_DEST/Contents/Resources/"
+cp "$SCRIPT_DIR/setup.sh"      "$APP_DEST/Contents/Resources/"
+cp -r "$SCRIPT_DIR/vault-config" "$APP_DEST/Contents/Resources/"
 
 # Patch Info.plist: add bundle ID + explicit markdown document type declarations
 python3 - "$APP_DEST" << 'PYEOF'
@@ -150,7 +152,7 @@ cat > "$WORKFLOW_DIR/Contents/document.wflow" <<'WFLOW'
                     <key>COMMAND_STRING</key>
                     <string>for f in "$@"
 do
-    MDPREVIEW_SH_PATH "$f"
+    open -a MDPreview "$f"
 done</string>
                     <key>CheckedForUserDefaultShell</key>
                     <true/>
@@ -243,9 +245,6 @@ done</string>
 </dict>
 </plist>
 WFLOW
-
-sed -i '' "s|MDPREVIEW_SH_PATH|$SCRIPT_DIR/md-preview.sh|g" \
-    "$WORKFLOW_DIR/Contents/document.wflow"
 
 echo "✓ Quick Action installed to $WORKFLOW_DIR"
 

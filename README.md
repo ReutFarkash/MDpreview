@@ -9,6 +9,16 @@ Open any Markdown file in Obsidian — even files outside any vault — with a s
 
 ## Install
 
+**Option A — DMG (recommended)**
+
+1. Download `MDPreview-<version>.dmg` from [Releases](https://github.com/ReutFarkash/MDpreview/releases)
+2. Open the DMG and drag **MDPreview.app** to **Applications**
+3. Double-click MDPreview.app — it sets up `~/MDPreview` automatically on first run
+
+To also get the Finder right-click action, clone the repo and run `bash install.sh`.
+
+**Option B — from source**
+
 ```bash
 # 1. Set up the vault (choose one option below)
 bash setup.sh
@@ -78,7 +88,8 @@ duti -s com.mdpreview.app public.plain-text all
 md-preview/
 ├── md-preview.sh              # core script
 ├── setup.sh                   # vault creation (run once)
-├── install.sh                 # app + Quick Action installer
+├── install.sh                 # app + Quick Action installer (local dev)
+├── build-dmg.sh               # build distributable DMG
 ├── automator/
 │   └── MDPreview.applescript  # source for MDPreview.app
 └── vault-config/

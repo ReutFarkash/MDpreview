@@ -41,7 +41,7 @@ run_test() {
     local output
     if output=$("$fn" 2>&1); then
         (( PASS++ )) || true
-        $VERBOSE && echo "  ✓ $name"
+        $VERBOSE && echo "  ✓ $name" || true
     else
         (( FAIL++ )) || true
         FAILURE_NAMES+=("$name")
@@ -439,33 +439,17 @@ run_test "md-preview: workspace detects source mode"      t_mdpreview_workspace_
 echo ""
 echo "── install.sh: path substitution ──────────────────────────────────────"
 
-t_applescript_placeholder_replaced() {
-    local tmp_as
-    tmp_as=$(mktemp /tmp/MDPreview_XXXXXX.applescript)
-    sed "s|MDPREVIEW_SH_PATH|$SCRIPT_DIR/md-preview.sh|g" \
-        "$SCRIPT_DIR/automator/MDPreview.applescript" > "$tmp_as"
-    assert_contains "$tmp_as" "$SCRIPT_DIR/md-preview.sh"
-    assert_absent   "$tmp_as" "MDPREVIEW_SH_PATH"
-    rm -f "$tmp_as"
+t_applescript_uses_path_to_me() {
+    assert_contains "$SCRIPT_DIR/automator/MDPreview.applescript" "path to me"
+    assert_contains "$SCRIPT_DIR/automator/MDPreview.applescript" "Contents/Resources/md-preview.sh"
 }
 
 t_applescript_no_hardcoded_paths() {
     assert_absent "$SCRIPT_DIR/automator/MDPreview.applescript" "/Users/"
 }
 
-t_wflow_sed_substitutes_placeholder() {
-    local tmp_wflow
-    tmp_wflow=$(mktemp /tmp/test_wflow_XXXXXX.xml)
-    cat > "$tmp_wflow" <<'XML'
-<string>for f in "$@"
-do
-    MDPREVIEW_SH_PATH "$f"
-done</string>
-XML
-    sed -i "" "s|MDPREVIEW_SH_PATH|$SCRIPT_DIR/md-preview.sh|g" "$tmp_wflow"
-    assert_contains "$tmp_wflow" "$SCRIPT_DIR/md-preview.sh"
-    assert_absent   "$tmp_wflow" "MDPREVIEW_SH_PATH"
-    rm -f "$tmp_wflow"
+t_wflow_uses_open_app() {
+    assert_contains "$SCRIPT_DIR/install.sh" "open -a MDPreview"
 }
 
 t_install_no_personal_paths() {
@@ -478,9 +462,9 @@ t_setup_no_personal_paths() {
     assert_absent "$SCRIPT_DIR/setup.sh" "claude_vault"
 }
 
-run_test "applescript: placeholder replaced before compile"   t_applescript_placeholder_replaced
+run_test "applescript: uses path to me + Resources path"      t_applescript_uses_path_to_me
 run_test "applescript: no hardcoded personal paths"           t_applescript_no_hardcoded_paths
-run_test "wflow: sed substitution works correctly"            t_wflow_sed_substitutes_placeholder
+run_test "wflow: Quick Action delegates to open -a MDPreview" t_wflow_uses_open_app
 run_test "install.sh: no personal paths"                      t_install_no_personal_paths
 run_test "setup.sh: no personal paths"                        t_setup_no_personal_paths
 
@@ -602,13 +586,20 @@ t_compile_no_placeholder_in_app() {
     } || true
 }
 
-t_compile_path_in_app() {
+t_compile_uses_path_to_me() {
     run_install
     local decompiled
     decompiled=$(osadecompile "$TEST_APP/Contents/Resources/Scripts/main.scpt" 2>/dev/null)
-    echo "$decompiled" | grep -q "$SCRIPT_DIR/md-preview.sh" || {
-        echo "Expected path not found in compiled app. Got: $decompiled"; return 1
+    echo "$decompiled" | grep -q "path to me" || {
+        echo "Expected 'path to me' not found in compiled app. Got: $decompiled"; return 1
     }
+}
+
+t_compile_resources_bundled() {
+    run_install
+    assert_file "$TEST_APP/Contents/Resources/md-preview.sh"
+    assert_file "$TEST_APP/Contents/Resources/setup.sh"
+    assert_dir  "$TEST_APP/Contents/Resources/vault-config"
 }
 
 t_compile_plist_has_bundle_id() {
@@ -623,26 +614,20 @@ assert p.get('CFBundleIdentifier') == 'com.mdpreview.app', \
 "
 }
 
-t_compile_wflow_has_path() {
+t_compile_wflow_uses_open_app() {
     run_install
     local wflow="$TEST_SERVICES/Open in MDPreview.workflow/Contents/document.wflow"
-    assert_file "$wflow"
-    assert_contains "$wflow" "$SCRIPT_DIR/md-preview.sh"
+    assert_file    "$wflow"
+    assert_contains "$wflow" "open -a MDPreview"
     assert_absent   "$wflow" "MDPREVIEW_SH_PATH"
-}
-
-t_compile_wflow_no_placeholder() {
-    run_install
-    local wflow="$TEST_SERVICES/Open in MDPreview.workflow/Contents/document.wflow"
-    assert_absent "$wflow" "MDPREVIEW_SH_PATH"
 }
 
 run_test "compile: app bundle created"                  t_compile_app_exists
 run_test "compile: no placeholder in compiled .scpt"    t_compile_no_placeholder_in_app
-run_test "compile: correct path in compiled .scpt"      t_compile_path_in_app
+run_test "compile: uses path to me in compiled .scpt"   t_compile_uses_path_to_me
+run_test "compile: resources bundled in app"            t_compile_resources_bundled
 run_test "compile: Info.plist has correct bundle ID"    t_compile_plist_has_bundle_id
-run_test "compile: wflow has correct path"              t_compile_wflow_has_path
-run_test "compile: wflow has no placeholder"            t_compile_wflow_no_placeholder
+run_test "compile: wflow delegates to open -a MDPreview" t_compile_wflow_uses_open_app
 
 fi  # end osacompile check
 
