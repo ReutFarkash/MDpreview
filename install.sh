@@ -5,8 +5,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SERVICES_DIR="$HOME/Library/Services"
-APP_DEST="/Applications/MDPreview.app"
+: "${SERVICES_DIR:=$HOME/Library/Services}"
+: "${APP_DEST:=/Applications/MDPreview.app}"
 WORKFLOW_NAME="Open in MDPreview"
 WORKFLOW_DIR="$SERVICES_DIR/${WORKFLOW_NAME}.workflow"
 

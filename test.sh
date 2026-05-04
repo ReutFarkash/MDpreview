@@ -485,7 +485,169 @@ run_test "install.sh: no personal paths"                      t_install_no_perso
 run_test "setup.sh: no personal paths"                        t_setup_no_personal_paths
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 7 — README completeness
+# SECTION 7 — md-preview.sh: Obsidian URI (mock open)
+#
+# We don't simulate Obsidian's GUI — we verify that md-preview.sh calls
+# `open` with a correctly formed obsidian:// URL. A mock `open` binary in
+# $PATH captures the call and writes it to a log file.
+# ─────────────────────────────────────────────────────────────────────────────
+echo ""
+echo "── md-preview.sh: Obsidian URI ─────────────────────────────────────────"
+
+MOCK_BIN="$TEST_HOME/mock-bin"
+OPEN_LOG="$TEST_HOME/open-calls.log"
+mkdir -p "$MOCK_BIN"
+
+# Mock `open` — logs every call, silently succeeds
+cat > "$MOCK_BIN/open" <<MOCK
+#!/bin/bash
+echo "\$@" >> "$OPEN_LOG"
+MOCK
+chmod +x "$MOCK_BIN/open"
+
+# Mock `osascript` — silently succeeds (we're not testing keystroke delivery)
+cat > "$MOCK_BIN/osascript" <<'MOCK'
+#!/bin/bash
+exit 0
+MOCK
+chmod +x "$MOCK_BIN/osascript"
+
+# Mock `pgrep` — always returns "not running" so the quit block is skipped
+cat > "$MOCK_BIN/pgrep" <<'MOCK'
+#!/bin/bash
+exit 1
+MOCK
+chmod +x "$MOCK_BIN/pgrep"
+
+run_md_preview_with_mocks() {
+    mkdir -p "$VAULT_DIR/.obsidian"
+    # Write a minimal workspace.json so the mode-check doesn't fail on missing file
+    echo '{"main":{"children":[]}}' > "$VAULT_DIR/.obsidian/workspace.json"
+    : > "$OPEN_LOG"
+    PATH="$MOCK_BIN:$PATH" HOME="$TEST_HOME" bash "$SCRIPT_DIR/md-preview.sh" "$@"
+}
+
+t_mdpreview_calls_open_with_obsidian_uri() {
+    local src="$TEST_HOME/hello.md"
+    echo "# Hi" > "$src"
+    run_md_preview_with_mocks "$src"
+    assert_file "$OPEN_LOG"
+    grep -q "obsidian://open" "$OPEN_LOG" || {
+        echo "open was not called with obsidian://open. Got: $(cat "$OPEN_LOG")"; return 1
+    }
+}
+
+t_mdpreview_uri_contains_vault_name() {
+    local src="$TEST_HOME/vault-check.md"
+    echo "# Test" > "$src"
+    run_md_preview_with_mocks "$src"
+    grep -q "vault=MDPreview" "$OPEN_LOG" || {
+        echo "URI missing vault=MDPreview. Got: $(cat "$OPEN_LOG")"; return 1
+    }
+}
+
+t_mdpreview_uri_contains_encoded_filename() {
+    local src="$TEST_HOME/encoded.md"
+    echo "# Test" > "$src"
+    run_md_preview_with_mocks "$src"
+    grep -q "file=encoded" "$OPEN_LOG" || {
+        echo "URI missing file=encoded. Got: $(cat "$OPEN_LOG")"; return 1
+    }
+}
+
+t_mdpreview_uri_encodes_spaces() {
+    local src="$TEST_HOME/my file.md"
+    echo "# Test" > "$src"
+    run_md_preview_with_mocks "$src"
+    grep -q "file=my%20file" "$OPEN_LOG" || {
+        echo "Spaces not percent-encoded. Got: $(cat "$OPEN_LOG")"; return 1
+    }
+}
+
+run_test "open: called with obsidian:// URI"         t_mdpreview_calls_open_with_obsidian_uri
+run_test "open: URI contains vault=MDPreview"        t_mdpreview_uri_contains_vault_name
+run_test "open: URI contains encoded filename"       t_mdpreview_uri_contains_encoded_filename
+run_test "open: spaces percent-encoded in filename"  t_mdpreview_uri_encodes_spaces
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 8 — install.sh: compile round-trip (requires osacompile/osadecompile)
+# ─────────────────────────────────────────────────────────────────────────────
+echo ""
+echo "── install.sh: compile round-trip ─────────────────────────────────────"
+
+if ! command -v osacompile &>/dev/null || ! command -v osadecompile &>/dev/null; then
+    echo "  (skipped — osacompile/osadecompile not available on this platform)"
+else
+
+TEST_APP="$TEST_HOME/MDPreview-test.app"
+TEST_SERVICES="$TEST_HOME/Services"
+
+run_install() {
+    APP_DEST="$TEST_APP" SERVICES_DIR="$TEST_SERVICES" \
+        bash "$SCRIPT_DIR/install.sh" 2>/dev/null
+}
+
+t_compile_app_exists() {
+    run_install
+    assert_dir "$TEST_APP"
+    assert_file "$TEST_APP/Contents/Resources/Scripts/main.scpt"
+}
+
+t_compile_no_placeholder_in_app() {
+    run_install
+    local decompiled
+    decompiled=$(osadecompile "$TEST_APP/Contents/Resources/Scripts/main.scpt" 2>/dev/null)
+    echo "$decompiled" | grep -q "MDPREVIEW_SH_PATH" && {
+        echo "Placeholder still present in compiled app"; return 1
+    } || true
+}
+
+t_compile_path_in_app() {
+    run_install
+    local decompiled
+    decompiled=$(osadecompile "$TEST_APP/Contents/Resources/Scripts/main.scpt" 2>/dev/null)
+    echo "$decompiled" | grep -q "$SCRIPT_DIR/md-preview.sh" || {
+        echo "Expected path not found in compiled app. Got: $decompiled"; return 1
+    }
+}
+
+t_compile_plist_has_bundle_id() {
+    run_install
+    assert_file "$TEST_APP/Contents/Info.plist"
+    python3 -c "
+import plistlib, sys
+with open('$TEST_APP/Contents/Info.plist', 'rb') as f:
+    p = plistlib.load(f)
+assert p.get('CFBundleIdentifier') == 'com.mdpreview.app', \
+    f\"Expected com.mdpreview.app, got {p.get('CFBundleIdentifier')}\"
+"
+}
+
+t_compile_wflow_has_path() {
+    run_install
+    local wflow="$TEST_SERVICES/Open in MDPreview.workflow/Contents/document.wflow"
+    assert_file "$wflow"
+    assert_contains "$wflow" "$SCRIPT_DIR/md-preview.sh"
+    assert_absent   "$wflow" "MDPREVIEW_SH_PATH"
+}
+
+t_compile_wflow_no_placeholder() {
+    run_install
+    local wflow="$TEST_SERVICES/Open in MDPreview.workflow/Contents/document.wflow"
+    assert_absent "$wflow" "MDPREVIEW_SH_PATH"
+}
+
+run_test "compile: app bundle created"                  t_compile_app_exists
+run_test "compile: no placeholder in compiled .scpt"    t_compile_no_placeholder_in_app
+run_test "compile: correct path in compiled .scpt"      t_compile_path_in_app
+run_test "compile: Info.plist has correct bundle ID"    t_compile_plist_has_bundle_id
+run_test "compile: wflow has correct path"              t_compile_wflow_has_path
+run_test "compile: wflow has no placeholder"            t_compile_wflow_no_placeholder
+
+fi  # end osacompile check
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 9 — README completeness
 # ─────────────────────────────────────────────────────────────────────────────
 echo ""
 echo "── README ──────────────────────────────────────────────────────────────"
