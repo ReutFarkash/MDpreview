@@ -1,0 +1,24 @@
+/* Text wrap for all property values */
+.bases-cards-line.bases-rendered-value {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    -webkit-line-clamp: unset;
+}
+
+/* Larger height for properties prone to long content */
+.bases-cards-property.mod-title {
+    height: 56px !important;
+}
+
+.bases-cards-property[data-property="note.channel"] {
+    height: 56px !important;
+}
+
+.bases-cards-property[data-property="note.tags_ai"] {
+    height: 72px !important;
+}
+
+.bases-cards-property[data-property="note.tags_user"] {
+    height: 56px !important;
+}
