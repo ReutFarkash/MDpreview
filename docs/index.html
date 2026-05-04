@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDPreview — Open any Markdown file in Obsidian</title>
+  <meta name="description" content="A fast, zero-friction way to open any Markdown file in Obsidian. No vault required. Your theme, your rendering, instantly.">
+  <meta property="og:title" content="MDPreview — Open any Markdown file in Obsidian">
+  <meta property="og:description" content="No vault required. Your Obsidian theme, your rendering, instantly.">
+  <meta property="og:type" content="website">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #FFF7ED;
+      --bg-subtle: #F0E6D8;
+      --text:      #292524;
+      --text-mid:  #78716C;
+      --text-faint:#A8968C;
+      --border:    #E2D6CC;
+      --btn-bg:    #292524;
+      --btn-text:  #FFF7ED;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23C8B8AE' stroke-width='1.2'%3E%3Cline x1='20' y1='15' x2='20' y2='25'/%3E%3Cline x1='15' y1='20' x2='25' y2='20'/%3E%3C/g%3E%3C/svg%3E");
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 18px 32px;
+      z-index: 100;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .nav-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      color: var(--text-faint);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .nav-icon:hover { color: var(--text-mid); }
+
+    .nav-icon svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+      margin: 0 10px;
+    }
+
+    .nav-dl {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: .01em;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      padding: 7px 16px;
+      border-radius: 100px;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+
+    .nav-dl:hover { opacity: .85; }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 110px 24px 56px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      margin-bottom: 16px;
+    }
+
+    .tagline {
+      font-size: 1.125rem;
+      color: var(--text-mid);
+      margin-bottom: 28px;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .command {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: .9rem;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 24px;
+      color: var(--text);
+      letter-spacing: .01em;
+    }
+
+    .command .prompt { color: var(--text-faint); }
+
+    /* ── SCREENSHOT ── */
+    .screenshot-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 72px;
+    }
+
+    /* ── FEATURES ── */
+    .features {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .feature {
+      font-size: 1rem;
+      color: var(--text-mid);
+    }
+
+    .feature::before {
+      content: '↗ ';
+      color: var(--text-faint);
+      font-size: .85em;
+    }
+
+    /* ── DOWNLOAD ── */
+    .download {
+      text-align: center;
+      padding: 0 24px 100px;
+    }
+
+    .btn-download {
+      display: inline-block;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 14px 32px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(41,37,36,.2);
+      transition: transform .15s, box-shadow .15s;
+      letter-spacing: .01em;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(41,37,36,.25);
+    }
+
+    .sub {
+      font-size: .8rem;
+      color: var(--text-faint);
+      margin-top: 12px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      font-size: .8rem;
+      color: var(--text-faint);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      nav { padding: 14px 20px; }
+      main { padding-top: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-right">
+
+      <!-- GitHub -->
+      <a href="https://github.com/ReutFarkash" class="nav-icon" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+        </svg>
+      </a>
+
+      <!-- Twitter -->
+      <a href="https://twitter.com/ReutFarkash" class="nav-icon" aria-label="Twitter">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+        </svg>
+      </a>
+
+      <!-- LinkedIn -->
+      <a href="https://www.linkedin.com/in/reutfarkash" class="nav-icon" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+      </a>
+
+      <!-- Email -->
+      <a href="mailto:reutfarkash@gmail.com" class="nav-icon" aria-label="Email">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+        </svg>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest" class="nav-dl">
+        Download
+      </a>
+
+    </div>
+  </nav>
+
+  <main>
+    <h1>Open any Markdown file<br>in Obsidian.</h1>
+    <p class="tagline">No vault required. Your theme, your fonts, your rendering — instantly.</p>
+    <div class="command">
+      <span class="prompt">$ </span>open -a MDPreview README.md
+    </div>
+  </main>
+
+  <div class="screenshot-wrap">
+    <img src="screenshot.png"
+         alt="MDPreview rendering markdown notes in Obsidian — two panes showing The Dispossessed book notes and Typography history"
+         style="width:100%;border-radius:14px;border:1px solid var(--border);display:block;box-shadow:0 8px 40px rgba(41,37,36,.12);">
+  </div>
+
+  <section class="features">
+    <div class="feature">Works on files outside any vault</div>
+    <div class="feature">Inherits your Obsidian theme and plugins</div>
+    <div class="feature">Right-click in Finder, double-click, or terminal</div>
+  </section>
+
+  <section class="download">
+    <div>
+      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest" class="btn-download">
+        Download v1.0.0 — Free
+      </a>
+    </div>
+    <p class="sub">macOS · Requires Obsidian</p>
+  </section>
+
+  <footer>Made by Reut Farkash</footer>
+
+</body>
+</html>
