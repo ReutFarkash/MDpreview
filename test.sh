@@ -111,27 +111,27 @@ echo ""
 echo "── setup.sh: plain ─────────────────────────────────────────────────────"
 
 t_plain_creates_vault() {
-    setup_with_args
+    setup_with_args --theme plain
     assert_dir "$VAULT_DIR"
 }
 
 t_plain_installs_obsidian() {
-    setup_with_args
+    setup_with_args --theme plain
     assert_dir "$VAULT_DIR/.obsidian"
 }
 
 t_plain_writes_workspace() {
-    setup_with_args
+    setup_with_args --theme plain
     assert_file "$VAULT_DIR/.obsidian/workspace.json"
 }
 
 t_plain_workspace_has_main_leaf() {
-    setup_with_args
+    setup_with_args --theme plain
     assert_contains "$VAULT_DIR/.obsidian/workspace.json" "main-leaf"
 }
 
 t_plain_empty_community_plugins() {
-    setup_with_args
+    setup_with_args --theme plain
     assert_file "$VAULT_DIR/.obsidian/community-plugins.json"
     local content
     content="$(cat "$VAULT_DIR/.obsidian/community-plugins.json")"
@@ -139,13 +139,13 @@ t_plain_empty_community_plugins() {
 }
 
 t_plain_no_themes_dir() {
-    setup_with_args
+    setup_with_args --theme plain
     [[ ! -d "$VAULT_DIR/.obsidian/themes" ]] || { echo "Unexpected themes dir in plain mode"; return 1; }
 }
 
 t_plain_safe_to_rerun() {
-    setup_with_args
-    setup_with_args
+    setup_with_args --theme plain
+    setup_with_args --theme plain
     assert_dir "$VAULT_DIR/.obsidian"
 }
 
