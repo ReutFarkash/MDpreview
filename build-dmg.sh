@@ -136,7 +136,7 @@ plist["CFBundleDocumentTypes"] = [
         "CFBundleTypeName": "Markdown Document",
         "CFBundleTypeRole": "Viewer",
         "LSItemContentTypes": ["net.daringfireball.markdown", "public.plain-text"],
-        "LSHandlerRank": "Alternate",
+        "LSHandlerRank": "Owner",
     }
 ]
 
