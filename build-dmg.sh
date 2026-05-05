@@ -38,6 +38,88 @@ cp "$SCRIPT_DIR/md-preview.sh" "$APP/Contents/Resources/"
 cp "$SCRIPT_DIR/setup.sh"      "$APP/Contents/Resources/"
 cp -r "$SCRIPT_DIR/vault-config" "$APP/Contents/Resources/"
 
+# Remove osacompile's asset catalog — it embeds the generic AppleScript icon
+# and macOS resolves it before CFBundleIconFile, overriding our .icns.
+rm -f "$APP/Contents/Resources/Assets.car"
+
+# ── 1a. Generate app icon ─────────────────────────────────────────────────────
+
+echo "Generating app icon..."
+ICON_TMP="$(mktemp -d)"
+/Users/reut/Code/claude/.venv/bin/python3 - "$ICON_TMP" << 'PYEOF'
+import sys
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageFont
+
+out_dir = Path(sys.argv[1])
+iconset = out_dir / "MDPreview.iconset"
+iconset.mkdir()
+
+# (logical_size, scale, actual_pixels)
+entries = [
+    (16, 1, 16),   (16, 2, 32),
+    (32, 1, 32),   (32, 2, 64),
+    (128, 1, 128), (128, 2, 256),
+    (256, 1, 256), (256, 2, 512),
+    (512, 1, 512), (512, 2, 1024),
+]
+
+ROSE     = "#D4839A"
+SAGE     = "#7DC490"
+LAVENDER = "#A898D4"
+BG       = "#FAF8F5"
+INK      = "#2C1A10"
+
+def make_icon(pixels):
+    r = int(pixels * 0.18)
+    stripe_h = int(pixels * 0.28)
+    sw = pixels // 3
+
+    # Rounded-rect mask
+    mask = Image.new("L", (pixels, pixels), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, pixels - 1, pixels - 1], radius=r, fill=255)
+
+    # Background layer: cream fill + three color stripes across the top
+    bg = Image.new("RGBA", (pixels, pixels), BG)
+    d = ImageDraw.Draw(bg)
+    d.rectangle([0,        0, sw,      stripe_h], fill=ROSE)
+    d.rectangle([sw,       0, sw * 2,  stripe_h], fill=SAGE)
+    d.rectangle([sw * 2,   0, pixels,  stripe_h], fill=LAVENDER)
+
+    # Clip to rounded rect
+    result = Image.new("RGBA", (pixels, pixels), (0, 0, 0, 0))
+    result.paste(bg, mask=mask)
+
+    # Draw "M↓" in the lower portion
+    font_size = int(pixels * 0.33)
+    try:
+        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial Bold.ttf", font_size)
+    except Exception:
+        font = ImageFont.load_default()
+
+    draw = ImageDraw.Draw(result)
+    text = "M↓"
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    lower_top = stripe_h
+    lower_h   = pixels - stripe_h
+    x = (pixels - tw) / 2 - bbox[0]
+    y = lower_top + (lower_h - th) / 2 - bbox[1]
+    draw.text((x, y), text, font=font, fill=INK)
+
+    return result
+
+for (logical, scale, pixels) in entries:
+    name = f"icon_{logical}x{logical}.png" if scale == 1 else f"icon_{logical}x{logical}@2x.png"
+    make_icon(pixels).save(iconset / name)
+
+print(f"✓ Iconset written to {iconset}")
+PYEOF
+
+iconutil --convert icns "$ICON_TMP/MDPreview.iconset" -o "$APP/Contents/Resources/MDPreviewIcon.icns"
+rm -rf "$ICON_TMP"
+echo "✓ Icon generated"
+
 python3 - "$APP" << 'PYEOF'
 import plistlib, sys
 
@@ -46,6 +128,7 @@ with open(plist_path, "rb") as f:
     plist = plistlib.load(f)
 
 plist["CFBundleIdentifier"] = "com.mdpreview.app"
+plist["CFBundleIconFile"] = "MDPreviewIcon"
 plist["CFBundleDocumentTypes"] = [
     {
         "CFBundleTypeExtensions": ["md", "markdown", "mdown", "mkd", "mkdn"],

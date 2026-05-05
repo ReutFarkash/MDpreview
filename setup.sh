@@ -18,7 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VAULT_DIR="$HOME/MDPreview"
 OBSIDIAN_CONFIG="$HOME/Library/Application Support/obsidian/obsidian.json"
 
-THEME="plain"
+THEME="bundled"
 FULL=false
 VAULT_PATH=""
 
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# ── Auto-detect source vault (for --theme vault or --full) ───────────────────
+# ── Auto-detect source vault (for --theme vault or --full only) ──────────────
 find_vault() {
     # Explicit --vault flag or SOURCE_VAULT env var take priority
     for v in "$VAULT_PATH" "${SOURCE_VAULT:-}"; do
@@ -53,7 +53,13 @@ find_vault() {
         fi
     done
 }
-SOURCE_VAULT="$(find_vault || true)"
+
+# Only scan for a source vault when it's actually needed
+if [[ "$THEME" == "vault" || "$FULL" == true ]]; then
+    SOURCE_VAULT="$(find_vault || true)"
+else
+    SOURCE_VAULT=""
+fi
 
 # Validate
 if [[ "$THEME" == "vault" && -z "$SOURCE_VAULT" ]]; then

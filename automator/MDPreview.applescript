@@ -13,6 +13,6 @@ end open
 on run
 	set appPath to POSIX path of (path to me)
 	set setupPath to appPath & "Contents/Resources/setup.sh"
-	do shell script "[ -d \"$HOME/MDPreview\" ] || bash " & quoted form of setupPath
+	do shell script "[ -d \"$HOME/MDPreview\" ] || bash " & quoted form of setupPath & " --theme bundled"
 	do shell script "open 'obsidian://open?vault=MDPreview'"
 end run
