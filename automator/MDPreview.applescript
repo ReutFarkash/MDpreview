@@ -13,6 +13,20 @@ end open
 on run
 	set appPath to POSIX path of (path to me)
 	set setupPath to appPath & "Contents/Resources/setup.sh"
-	do shell script "[ -d \"$HOME/MDPreview\" ] || bash " & quoted form of setupPath & " --theme bundled"
+	set setDefaultPath to appPath & "Contents/Resources/set-default"
+
+	-- Detect first run before setup creates the vault
+	set vaultExists to (do shell script "[ -d \"$HOME/MDPreview\" ] && echo yes || echo no")
+
+	if vaultExists is "no" then
+		do shell script "bash " & quoted form of setupPath & " --theme bundled"
+
+		-- Dialog works natively here; do shell script subprocesses can't show UI
+		set choice to button returned of (display dialog "Would you like MDPreview to open .md files by default?" buttons {"Not Now", "Set as Default"} default button "Set as Default" with title "MDPreview")
+		if choice is "Set as Default" then
+			do shell script quoted form of setDefaultPath
+		end if
+	end if
+
 	do shell script "open 'obsidian://open?vault=MDPreview'"
 end run

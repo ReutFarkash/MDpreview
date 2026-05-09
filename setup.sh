@@ -244,41 +244,6 @@ open -a Obsidian
 sleep 3
 open "obsidian://open?vault=MDPreview"
 
-# ── Offer to set as default .md opener ───────────────────────────────────────
-SET_DEFAULT_BIN="$SCRIPT_DIR/set-default"
-
-# If running from repo (no pre-compiled binary), try to compile on the fly
-if [[ ! -f "$SET_DEFAULT_BIN" && -f "$SCRIPT_DIR/automator/set-default.swift" ]] \
-    && command -v swiftc &>/dev/null; then
-    echo ""
-    echo "Compiling set-default helper..."
-    swiftc -O -o "$SET_DEFAULT_BIN" "$SCRIPT_DIR/automator/set-default.swift" 2>/dev/null \
-        || SET_DEFAULT_BIN=""
-fi
-
-if [[ -f "$SET_DEFAULT_BIN" ]]; then
-    echo ""
-    DIALOG_RESULT=$(osascript 2>/dev/null <<'APPLESCRIPT' || true
-        tell application "System Events"
-            set r to display dialog "Would you like MDPreview to open .md files by default?" ¬
-                buttons {"Not Now", "Set as Default"} ¬
-                default button "Set as Default" ¬
-                with title "MDPreview"
-            return button returned of r
-        end tell
-APPLESCRIPT
-    )
-    if [[ "$DIALOG_RESULT" == "Set as Default" ]]; then
-        if "$SET_DEFAULT_BIN"; then
-            echo "✓ MDPreview is now your default .md opener"
-        else
-            echo "  Could not set as default — try System Settings → Privacy & Security → Default Apps"
-        fi
-    else
-        echo "  Skipped — set it later via System Settings → Privacy & Security → Default Apps"
-    fi
-fi
-
 echo ""
 echo "✓ Setup complete. If Obsidian asks to trust the vault, click Trust."
 echo "  Run bash install.sh next to add the Finder Quick Action and app."
