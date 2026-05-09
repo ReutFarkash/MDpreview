@@ -15,6 +15,14 @@ Open any Markdown file in Obsidian — even files outside any vault — with a s
 2. Open the DMG and drag **MDPreview.app** to **Applications**
 3. Double-click MDPreview.app — it sets up `~/MDPreview` automatically on first run
 
+**First-run prompts — all expected, here's what to click:**
+
+| Prompt | Action |
+|---|---|
+| *"MDPreview.app is downloaded from the Internet…"* | Click **Open** — Apple has scanned it and found no malicious software |
+| *"Would you like MDPreview to open .md files by default?"* | Click **Set as Default** to double-click open `.md` files. ⚠️ This dialog can appear behind Obsidian's window — if you don't see it, look behind the trust dialog below |
+| *"Do you trust the author of this vault?"* | Click **Trust author and enable plugins** |
+
 To also get the Finder right-click action, clone the repo and run `bash install.sh`.
 
 **Option B — from source**
@@ -41,7 +49,6 @@ bash install.sh
 
 ### First-run permissions
 
-- **Obsidian trust prompt:** click **Trust** when Obsidian opens the MDPreview vault
 - **Accessibility (for reading mode):** System Settings → Privacy & Security → Accessibility → enable **Finder**
 
 ## Usage
@@ -62,13 +69,16 @@ alias md-preview='bash /path/to/md-preview/md-preview.sh'
 
 ## Set as default app for .md files
 
+On first launch from the DMG, MDPreview will ask you automatically — click **Set as Default**.
+
+If you skipped it or installed from source:
+
 **Option A — Finder:**
 Right-click any `.md` file → Get Info → Open With → select MDPreview → Change All...
 
-**Option B — Terminal** (requires `brew install duti`):
+**Option B — Terminal:**
 ```bash
-duti -s com.mdpreview.app net.daringfireball.markdown all
-duti -s com.mdpreview.app public.plain-text all
+/Applications/MDPreview.app/Contents/Resources/set-default
 ```
 
 ## How it works

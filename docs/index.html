@@ -164,6 +164,63 @@
       font-size: .85em;
     }
 
+    /* ── FIRST RUN ── */
+    .firstrun {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 24px 72px;
+    }
+
+    .firstrun h2 {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .firstrun ol {
+      list-style: none;
+      counter-reset: steps;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .firstrun li {
+      counter-increment: steps;
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+      font-size: .9rem;
+      color: var(--text-mid);
+      text-align: left;
+    }
+
+    .firstrun li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      font-size: .7rem;
+      font-weight: 600;
+      color: var(--text-faint);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .firstrun .warn {
+      font-size: .78rem;
+      color: var(--text-faint);
+      margin-top: 2px;
+    }
+
     /* ── DOWNLOAD ── */
     .download {
       text-align: center;
@@ -271,6 +328,19 @@
     <div class="feature">Works on files outside any vault</div>
     <div class="feature">Inherits your Obsidian theme and plugins</div>
     <div class="feature">Right-click in Finder, double-click, or terminal</div>
+  </section>
+
+  <section class="firstrun">
+    <h2>First run</h2>
+    <ol>
+      <li>Drag <strong>MDPreview.app</strong> to Applications, then double-click to open.<br>
+        <span class="warn">macOS will warn it was downloaded from the internet — click <strong>Open</strong>. Apple has scanned it.</span>
+      </li>
+      <li>A dialog asks: <em>"Would you like MDPreview to open .md files by default?"</em><br>
+        <span class="warn">Click <strong>Set as Default</strong>. It may appear behind Obsidian's window — look behind the trust prompt if you don't see it.</span>
+      </li>
+      <li>Obsidian opens and asks if you trust the vault — click <strong>Trust author and enable plugins</strong>.</li>
+    </ol>
   </section>
 
   <section class="download">
