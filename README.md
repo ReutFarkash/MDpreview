@@ -121,7 +121,8 @@ alias md-preview='bash /path/to/md-preview/md-preview.sh'
 
 ### Windows
 
-**Right-click** any file in Explorer → **Open in MDPreview** (after `install.bat`).
+**Right-click** any file in Explorer → **Open in MDPreview** (after `install.bat`)
+> On Windows 11: the entry is under **Show more options** (bottom of the right-click menu, or Shift+right-click)..
 
 **PowerShell:**
 ```powershell
