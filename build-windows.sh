@@ -12,6 +12,8 @@ cp "$SCRIPT_DIR/md-preview.ps1" \
    "$SCRIPT_DIR/install.ps1" \
    "$SCRIPT_DIR/install.bat" \
    "$SCRIPT_DIR/setup-and-install.bat" \
+   "$SCRIPT_DIR/set-default.ps1" \
+   "$SCRIPT_DIR/set-default.bat" \
    "$WORK/"
 cp -r "$SCRIPT_DIR/vault-config" "$WORK/"
 
