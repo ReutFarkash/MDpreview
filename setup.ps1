@@ -53,16 +53,16 @@ if ($Full -and -not $SourceVault) {
     $Full = $false
 }
 
-Write-Host '─────────────────────────────────────────────'
-Write-Host '  md-preview setup'
-Write-Host "  Theme:   $Theme"
-Write-Host "  Plugins: $(if ($Full) { 'full' } else { 'minimal' })"
-if ($SourceVault) { Write-Host "  Source:  $SourceVault" }
-Write-Host '─────────────────────────────────────────────'
+Write-Output '─────────────────────────────────────────────'
+Write-Output '  md-preview setup'
+Write-Output "  Theme:   $Theme"
+Write-Output "  Plugins: $(if ($Full) { 'full' } else { 'minimal' })"
+if ($SourceVault) { Write-Output "  Source:  $SourceVault" }
+Write-Output '─────────────────────────────────────────────'
 
 # ── Create vault directory ────────────────────────────────────────────────────
-Write-Host ''
-Write-Host "Creating vault at $VaultDir ..."
+Write-Output ''
+Write-Output "Creating vault at $VaultDir ..."
 
 if (-not (Test-Path $VaultDir)) { New-Item -ItemType Directory -Path $VaultDir | Out-Null }
 $ObsidianDir = Join-Path $VaultDir '.obsidian'
@@ -73,14 +73,14 @@ switch ($Theme) {
 
     'plain' {
         Copy-Item -Recurse -Force (Join-Path $ScriptDir 'vault-config\plain\.obsidian') $ObsidianDir
-        Write-Host '✓ Plain Obsidian config installed'
+        Write-Output '✓ Plain Obsidian config installed'
     }
 
     'bundled' {
         Copy-Item -Recurse -Force (Join-Path $ScriptDir 'vault-config\bundled\.obsidian') $ObsidianDir
         if ($Full) {
-            Write-Host '✓ Bundled AnuPpuccin config installed'
-            Write-Host "  Copying full plugin set from $SourceVault ..."
+            Write-Output '✓ Bundled AnuPpuccin config installed'
+            Write-Output "  Copying full plugin set from $SourceVault ..."
             $FullPlugins = @(
                 'dataview', 'obsidian-excalidraw-plugin', 'obsidian-icon-shortcodes',
                 'templater-obsidian', 'obsidian-auto-link-title', 'url-into-selection'
@@ -89,20 +89,20 @@ switch ($Theme) {
                 $src = Join-Path $SourceVault ".obsidian\plugins\$plugin"
                 if (Test-Path $src) {
                     Copy-Item -Recurse -Force $src (Join-Path $ObsidianDir "plugins\$plugin")
-                    Write-Host "    ✓ $plugin"
+                    Write-Output "    ✓ $plugin"
                 } else {
-                    Write-Host "    ⚠ $plugin not found in source vault — skipping"
+                    Write-Output "    ⚠ $plugin not found in source vault — skipping"
                 }
             }
             Copy-Item -Force (Join-Path $ScriptDir 'vault-config\plugins-full.json') `
                              (Join-Path $ObsidianDir 'community-plugins.json')
         } else {
-            Write-Host '✓ Bundled AnuPpuccin config installed (Style Settings only)'
+            Write-Output '✓ Bundled AnuPpuccin config installed (Style Settings only)'
         }
     }
 
     'vault' {
-        Write-Host "  Copying full .obsidian from $SourceVault ..."
+        Write-Output "  Copying full .obsidian from $SourceVault ..."
         Copy-Item -Recurse -Force (Join-Path $SourceVault '.obsidian') $ObsidianDir
         # Remove vault-specific files
         foreach ($f in @('workspace.json', 'daily-notes.json', 'templates.json')) {
@@ -133,9 +133,9 @@ switch ($Theme) {
                         Remove-Item -Recurse -Force
                 }
             }
-            Write-Host '✓ Vault theme installed (Style Settings only)'
+            Write-Output '✓ Vault theme installed (Style Settings only)'
         } else {
-            Write-Host '✓ Vault theme + full plugin set installed'
+            Write-Output '✓ Vault theme + full plugin set installed'
         }
     }
 }
@@ -188,12 +188,12 @@ New-Item -ItemType Directory -Path $ObsidianDir -Force | Out-Null
 '@ | Set-Content (Join-Path $ObsidianDir 'workspace.json')
 
 # ── Register vault in Obsidian's config ──────────────────────────────────────
-Write-Host ''
-Write-Host 'Registering vault with Obsidian...'
+Write-Output ''
+Write-Output 'Registering vault with Obsidian...'
 
 $ObsProcess = Get-Process -Name 'Obsidian' -ErrorAction SilentlyContinue
 if ($ObsProcess) {
-    Write-Host '  Obsidian is running — quitting to update vault registry...'
+    Write-Output '  Obsidian is running — quitting to update vault registry...'
     $ObsProcess | Stop-Process -Force
     Start-Sleep -Seconds 2
 }
@@ -210,7 +210,7 @@ if (-not $config.PSObject.Properties['vaults']) {
 $AlreadyRegistered = $false
 foreach ($uid in $config.vaults.PSObject.Properties.Name) {
     if ($config.vaults.$uid.path -eq $VaultDir) {
-        Write-Host "  Already registered as $uid"
+        Write-Output "  Already registered as $uid"
         $AlreadyRegistered = $true
         break
     }
@@ -224,13 +224,13 @@ if (-not $AlreadyRegistered) {
     $ConfigDir = Split-Path $ObsidianConfig
     if (-not (Test-Path $ConfigDir)) { New-Item -ItemType Directory -Path $ConfigDir | Out-Null }
     $config | ConvertTo-Json -Depth 5 -Compress | Set-Content $ObsidianConfig
-    Write-Host "  ✓ Registered (id: $uid)"
+    Write-Output "  ✓ Registered (id: $uid)"
 }
 
 # ── Launch Obsidian ───────────────────────────────────────────────────────────
-Write-Host 'Launching Obsidian...'
+Write-Output 'Launching Obsidian...'
 Start-Process 'obsidian://open?vault=MDPreview'
 
-Write-Host ''
-Write-Host '✓ Setup complete. If Obsidian asks to trust the vault, click Trust.'
-Write-Host '  Run install.bat next to add the right-click context menu entry.'
+Write-Output ''
+Write-Output '✓ Setup complete. If Obsidian asks to trust the vault, click Trust.'
+Write-Output '  Run install.bat next to add the right-click context menu entry.'
