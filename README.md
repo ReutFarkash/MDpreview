@@ -71,15 +71,48 @@ bash install.sh
 
 ### Quick start
 
-```powershell
-git clone https://github.com/ReutFarkash/MDpreview.git
-cd MDpreview
+1. Download `MDPreview-Windows.zip` from [Releases](https://github.com/ReutFarkash/MDpreview/releases)
+2. Extract the zip — Windows will create a `MDPreview-Windows` folder
+3. Open **PowerShell** (Start → type `powershell` → Enter)
+4. Run these commands:
 
-.\setup.ps1     # creates %USERPROFILE%\MDPreview vault, registers with Obsidian
-.\install.bat   # adds "Open in MDPreview" to right-click context menu
+```powershell
+cd $env:USERPROFILE\Downloads\MDPreview-Windows
+
+# Strip the internet zone marker so scripts run without SmartScreen fights
+Get-ChildItem -Recurse | Unblock-File
+
+# Allow scripts for this session only
+Set-ExecutionPolicy Bypass -Scope Process
+
+# Set up the vault and register it with Obsidian
+.\setup.ps1
+
+# Add "Open in MDPreview" to the right-click context menu
+.\install.ps1
 ```
 
-When Obsidian opens, click **Trust author and enable plugins** if prompted.
+5. When Obsidian opens, click **Trust author and enable plugins** if prompted.
+6. Right-click any `.md` file → **Open in MDPreview**
+   > On Windows 11 this appears under **Show more options** at the bottom of the right-click menu.
+
+### Set as default app for .md files (Windows)
+
+To make double-clicking `.md` files open MDPreview automatically:
+
+```powershell
+.\set-default.ps1
+```
+
+This compiles a small `MDPreview.exe` launcher, registers it as a per-user file handler, then walks you through the Windows **Open with** dialog to complete the association. No admin rights required.
+
+### Uninstall
+
+To remove everything MDPreview added (registry entries, Obsidian vault registration, vault folder):
+
+```powershell
+.\uninstall.ps1
+```
 
 ### Windows setup options
 
@@ -97,7 +130,8 @@ When Obsidian opens, click **Trust author and enable plugins** if prompted.
 
 - **Reading mode:** press `Ctrl+E` in Obsidian (auto-toggle is macOS-only for now)
 - **Symlinks** require Developer Mode (Settings → Privacy & Security → For developers). Without it, md-preview copies the file instead — changes to the original won't reflect until you open it again.
-- **Context menu entry** is per-user (HKCU registry) — no admin rights required. To remove it: `Remove-Item -Recurse 'HKCU:\Software\Classes\*\shell\Open in MDPreview'`
+- **Do not double-click the `.bat` files** — they exist as a fallback but are blocked by SmartScreen on most systems. Always run scripts from PowerShell directly as shown above.
+- **Context menu entry** is per-user (HKCU registry) — no admin rights required.
 
 ---
 

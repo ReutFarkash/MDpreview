@@ -297,28 +297,44 @@
       <div class="install-step">
         <div class="step-num">1</div>
         <div>
-          <strong>Extract the zip</strong> anywhere — your Downloads folder is fine.
+          <strong>Extract the zip</strong> — Windows will create a <code>MDPreview-Windows</code> folder in Downloads.
         </div>
       </div>
       <div class="install-step">
         <div class="step-num">2</div>
         <div>
-          <strong>Double-click <code>setup-and-install.bat</code></strong> inside the extracted folder.
-          <span class="note">Sets up the MDPreview vault, registers it with Obsidian, and adds the right-click menu entry. No admin rights needed.</span>
+          <strong>Open PowerShell</strong> — Start → type <code>powershell</code> → Enter.
+          <span class="note">Do not double-click the .bat files — they are blocked by SmartScreen on most systems.</span>
         </div>
       </div>
       <div class="install-step">
         <div class="step-num">3</div>
         <div>
-          <strong>Click Trust author and enable plugins</strong> when Obsidian opens.
+          <strong>Run these four commands:</strong>
+          <span class="note"><code>cd $env:USERPROFILE\Downloads\MDPreview-Windows</code></span>
+          <span class="note"><code>Get-ChildItem -Recurse | Unblock-File</code></span>
+          <span class="note"><code>Set-ExecutionPolicy Bypass -Scope Process</code></span>
+          <span class="note"><code>.\setup.ps1</code> &nbsp;then&nbsp; <code>.\install.ps1</code></span>
         </div>
       </div>
       <div class="install-step">
         <div class="step-num">4</div>
         <div>
+          <strong>Click Trust author and enable plugins</strong> when Obsidian opens.
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">5</div>
+        <div>
           <strong>Right-click any .md file → Open in MDPreview.</strong>
-          <span class="warn">On Windows 11: look under "Show more options" at the bottom of the right-click menu.</span>
+          <span class="warn">On Windows 11: look under <strong>Show more options</strong> at the bottom of the right-click menu.</span>
           <span class="warn">Press Ctrl+E in Obsidian to switch to reading mode.</span>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">6</div>
+        <div>
+          <strong>Optional: set as default app</strong> — run <code>.\set-default.ps1</code> to make double-clicking .md files open MDPreview automatically.
         </div>
       </div>
     </div>

@@ -19,7 +19,7 @@ cp "$SCRIPT_DIR/md-preview.ps1" \
    "$WORK/"
 cp -r "$SCRIPT_DIR/vault-config" "$WORK/"
 
-cd "$(dirname "$WORK")"
-zip -r "$OUT" MDPreview-Windows/ --exclude "*.DS_Store"
+cd "$WORK"
+zip -r "$OUT" . --exclude "*.DS_Store"
 
 echo "Built: $OUT ($(du -sh "$OUT" | cut -f1))"
