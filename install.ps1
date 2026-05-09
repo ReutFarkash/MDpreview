@@ -27,9 +27,9 @@ Set-ItemProperty -Path $MenuKey -Name '(Default)' -Value 'Open in MDPreview'
 New-Item    -Path $CommandKey -Force | Out-Null
 Set-ItemProperty -Path $CommandKey -Name '(Default)' -Value $Command
 
-Write-Output ''
-Write-Output '[OK] Context menu entry added.'
-Write-Output '  Right-click any file -> "Open in MDPreview"'
-Write-Output ''
-Write-Output 'To remove:'
-Write-Output "  Remove-Item -Recurse 'HKCU:\Software\Classes\*\shell\Open in MDPreview'"
+Write-Host ''
+Write-Host '[OK] Context menu entry added.'
+Write-Host '  Right-click any file -> "Open in MDPreview"'
+Write-Host ''
+Write-Host 'To remove:'
+Write-Host "  Remove-Item -Recurse 'HKCU:\Software\Classes\*\shell\Open in MDPreview'"

@@ -40,6 +40,6 @@ jobs:
       - name: Lint PowerShell scripts
         shell: pwsh
         run: |
-          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Warning,Error -ExcludeRule PSUseBOMForUnicodeEncodedFile
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Warning,Error -Settings PSScriptAnalyzerSettings.psd1
           $results | Format-Table -AutoSize
           if ($results) { exit 1 }
