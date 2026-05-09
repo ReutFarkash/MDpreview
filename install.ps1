@@ -3,7 +3,7 @@
 .SYNOPSIS
     Add "Open in MDPreview" to the Windows right-click context menu.
 .DESCRIPTION
-    Writes per-user registry entries under HKCU — no admin rights required.
+    Writes per-user registry entries under HKCU - no admin rights required.
     Run install.bat to execute this without changing your execution policy.
 #>
 
@@ -28,8 +28,8 @@ New-Item    -Path $CommandKey -Force | Out-Null
 Set-ItemProperty -Path $CommandKey -Name '(Default)' -Value $Command
 
 Write-Output ''
-Write-Output '✓ Context menu entry added.'
-Write-Output '  Right-click any file → "Open in MDPreview"'
+Write-Output '[OK] Context menu entry added.'
+Write-Output '  Right-click any file -> "Open in MDPreview"'
 Write-Output ''
 Write-Output 'To remove:'
 Write-Output "  Remove-Item -Recurse 'HKCU:\Software\Classes\*\shell\Open in MDPreview'"

@@ -44,4 +44,4 @@ try {
 $Encoded = [System.Uri]::EscapeDataString($Filename)
 Start-Process "obsidian://open?vault=${VaultName}&file=${Encoded}"
 
-# Reading mode: press Ctrl+E in Obsidian (Option C — no auto-toggle on Windows yet)
+# Reading mode: press Ctrl+E in Obsidian (Option C - no auto-toggle on Windows yet)
