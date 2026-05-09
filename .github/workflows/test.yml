@@ -40,6 +40,6 @@ jobs:
       - name: Lint PowerShell scripts
         shell: pwsh
         run: |
-          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Include *.ps1 -Severity Warning,Error
+          $results = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Warning,Error
           $results | Format-Table -AutoSize
           if ($results) { exit 1 }
