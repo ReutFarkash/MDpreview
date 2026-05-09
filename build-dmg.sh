@@ -146,9 +146,20 @@ PYEOF
 
 echo "✓ App built"
 
+# ── 1b. Compile Swift helper ──────────────────────────────────────────────────
+
+echo "Compiling set-default helper..."
+swiftc -O -o "$APP/Contents/Resources/set-default" \
+    "$SCRIPT_DIR/automator/set-default.swift"
+echo "✓ Helper compiled"
+
 # ── 2. Sign the app (hardened runtime required for notarization) ──────────────
 
 echo "Signing MDPreview.app..."
+# Sign the helper binary explicitly — --deep does not traverse loose executables in Resources/
+codesign --force --options runtime \
+    --sign "$SIGN_ID" \
+    "$APP/Contents/Resources/set-default"
 codesign --deep --force --options runtime \
     --entitlements "$SCRIPT_DIR/entitlements.plist" \
     --sign "$SIGN_ID" \
