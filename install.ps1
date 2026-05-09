@@ -19,7 +19,8 @@ if (-not (Test-Path $PsScript)) {
 
 $MenuKey    = 'HKCU:\Software\Classes\*\shell\Open in MDPreview'
 $CommandKey = "$MenuKey\command"
-$Command    = "powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File `"$PsScript`" `"%1`""
+$PS         = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+$Command    = "`"$PS`" -ExecutionPolicy Bypass -NoProfile -File `"$PsScript`" `"%1`""
 
 New-Item    -Path $MenuKey    -Force | Out-Null
 Set-ItemProperty -Path $MenuKey -Name '(Default)' -Value 'Open in MDPreview'
