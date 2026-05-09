@@ -121,6 +121,35 @@
       margin-right: auto;
     }
 
+    /* ── PLATFORM SWITCHER ── */
+    .platform-switch {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 3px;
+      gap: 2px;
+      margin-bottom: 20px;
+    }
+
+    .ps-btn {
+      background: none;
+      border: none;
+      padding: 6px 18px;
+      border-radius: 100px;
+      font-size: .875rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-mid);
+      transition: background .15s, color .15s;
+      font-family: inherit;
+    }
+
+    .ps-btn.active {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+    }
+
     .command {
       display: inline-block;
       font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -164,33 +193,30 @@
       font-size: .85em;
     }
 
-    /* ── FIRST RUN ── */
-    .firstrun {
-      max-width: 520px;
+    /* ── INSTALL SECTION ── */
+    .install {
+      max-width: 560px;
       margin: 0 auto;
       padding: 0 24px 72px;
     }
 
-    .firstrun h2 {
+    .install h2 {
       font-size: .7rem;
       font-weight: 600;
       letter-spacing: .1em;
       text-transform: uppercase;
       color: var(--text-faint);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       text-align: center;
     }
 
-    .firstrun ol {
-      list-style: none;
-      counter-reset: steps;
+    .install-steps {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .firstrun li {
-      counter-increment: steps;
+    .install-step {
       display: flex;
       gap: 12px;
       align-items: flex-start;
@@ -199,8 +225,7 @@
       text-align: left;
     }
 
-    .firstrun li::before {
-      content: counter(steps);
+    .step-num {
       flex-shrink: 0;
       width: 20px;
       height: 20px;
@@ -215,17 +240,27 @@
       justify-content: center;
     }
 
-    .firstrun .warn {
-      font-size: .78rem;
-      color: var(--text-faint);
-      margin-top: 2px;
-      display: block;
-    }
-
-    .firstrun li > div {
+    .install-step > div {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      flex: 1;
+    }
+
+    .install-step .warn {
+      font-size: .78rem;
+      color: var(--text-faint);
+      display: block;
+    }
+
+    .install-step .note {
+      font-size: .78rem;
+      color: var(--text-faint);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 12px;
+      display: block;
     }
 
     .step-img {
@@ -236,6 +271,21 @@
       box-shadow: 0 4px 16px rgba(41,37,36,.08);
       display: block;
     }
+
+    .code-block {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: .8rem;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      text-align: left;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .code-block .prompt { color: var(--text-faint); }
 
     /* ── DOWNLOAD ── */
     .download {
@@ -277,6 +327,14 @@
       color: var(--text-faint);
     }
 
+    /* ── PLATFORM VISIBILITY ── */
+    [data-show="mac"]  { display: none; }
+    [data-show="win"]  { display: none; }
+    body.platform-mac  [data-show="mac"]  { display: block; }
+    body.platform-mac  [data-show="mac"].inline  { display: inline; }
+    body.platform-win  [data-show="win"]  { display: block; }
+    body.platform-win  [data-show="win"].inline  { display: inline; }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 480px) {
       nav { padding: 14px 20px; }
@@ -284,7 +342,7 @@
     }
   </style>
 </head>
-<body>
+<body class="platform-mac">
 
   <nav>
     <div class="nav-right">
@@ -319,8 +377,11 @@
 
       <div class="nav-divider"></div>
 
-      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview.dmg" class="nav-dl">
+      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview.dmg" class="nav-dl" data-show="mac">
         Download
+      </a>
+      <a href="https://github.com/ReutFarkash/MDpreview" class="nav-dl" data-show="win">
+        GitHub
       </a>
 
     </div>
@@ -329,8 +390,19 @@
   <main>
     <h1>Open any Markdown file<br>in Obsidian.</h1>
     <p class="tagline">No vault required. Your theme, your fonts, your rendering — instantly.</p>
-    <div class="command">
+
+    <div class="platform-switch">
+      <button class="ps-btn active" data-platform="mac">macOS</button>
+      <button class="ps-btn" data-platform="win">Windows</button>
+    </div>
+
+    <br>
+
+    <div class="command" data-show="mac">
       <span class="prompt">$ </span>open -a MDPreview README.md
+    </div>
+    <div class="command" data-show="win">
+      <span class="prompt">PS&gt; </span>.\md-preview.ps1 README.md
     </div>
   </main>
 
@@ -343,44 +415,104 @@
   <section class="features">
     <div class="feature">Works on files outside any vault</div>
     <div class="feature">Inherits your Obsidian theme and plugins</div>
-    <div class="feature">Right-click in Finder, double-click, or terminal</div>
+    <div class="feature" data-show="mac">Right-click in Finder, double-click, or terminal</div>
+    <div class="feature" data-show="win">Right-click in Explorer or run from PowerShell</div>
   </section>
 
-  <section class="firstrun">
+  <!-- macOS first-run -->
+  <section class="install" data-show="mac">
     <h2>First run</h2>
-    <ol>
-      <li>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="step-num">1</div>
         <div>
           <strong>Click Open</strong> — Apple has already scanned it for malicious software.
           <img src="screenshots/install-02-gatekeeper.png" alt="macOS Gatekeeper dialog" class="step-img">
         </div>
-      </li>
-      <li>
+      </div>
+      <div class="install-step">
+        <div class="step-num">2</div>
         <div>
           <strong>Click Set as Default</strong> to open .md files by double-clicking.<br>
           <span class="warn">May appear behind Obsidian's window — look behind the trust prompt if you don't see it.</span>
           <img src="screenshots/install-04-set-default-close.png" alt="Set as Default dialog" class="step-img">
         </div>
-      </li>
-      <li>
+      </div>
+      <div class="install-step">
+        <div class="step-num">3</div>
         <div>
           <strong>Click Trust author and enable plugins</strong> when Obsidian opens the vault.
           <img src="screenshots/install-03-trust-vault.png" alt="Obsidian trust vault dialog" class="step-img">
         </div>
-      </li>
-    </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Windows install -->
+  <section class="install" data-show="win">
+    <h2>Install</h2>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="step-num">1</div>
+        <div>
+          <strong>Clone the repo</strong>
+          <div class="code-block"><span class="prompt">PS&gt; </span>git clone https://github.com/ReutFarkash/MDpreview.git
+<span class="prompt">PS&gt; </span>cd MDpreview</div>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">2</div>
+        <div>
+          <strong>Set up the vault</strong>
+          <div class="code-block"><span class="prompt">PS&gt; </span>.\setup.ps1</div>
+          <span class="note">Creates <code>%USERPROFILE%\MDPreview</code>, registers the vault with Obsidian, and launches it. Click <strong>Trust author and enable plugins</strong> when prompted.</span>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">3</div>
+        <div>
+          <strong>Add the right-click menu entry</strong>
+          <div class="code-block"><span class="prompt">PS&gt; </span>.\install.bat</div>
+          <span class="note">Writes a per-user registry entry — no admin rights required. After this, right-click any file → <strong>Open in MDPreview</strong>.</span>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">4</div>
+        <div>
+          <strong>Open a file and press Ctrl+E</strong> to enter reading mode.
+          <span class="warn">Auto-switch to reading mode is macOS-only for now.</span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="download">
-    <div>
+    <div data-show="mac">
       <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview.dmg" class="btn-download" download>
         Download — Free
       </a>
+      <p class="sub">macOS · Requires Obsidian</p>
     </div>
-    <p class="sub">macOS · Requires Obsidian</p>
+    <div data-show="win">
+      <a href="https://github.com/ReutFarkash/MDpreview" class="btn-download">
+        View on GitHub
+      </a>
+      <p class="sub">Windows · Requires Obsidian · PowerShell 5.1+</p>
+    </div>
   </section>
 
   <footer>Made by Reut Farkash</footer>
+
+  <script>
+    document.querySelectorAll('.ps-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var platform = btn.dataset.platform;
+        document.querySelectorAll('.ps-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.body.className = 'platform-' + platform;
+      });
+    });
+  </script>
 
 </body>
 </html>
