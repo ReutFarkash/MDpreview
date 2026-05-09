@@ -17,16 +17,18 @@ if (-not (Test-Path $PsScript)) {
     exit 1
 }
 
-$MenuKey    = 'HKCU:\Software\Classes\*\shell\Open in MDPreview'
-$CommandKey = "$MenuKey\command"
-$PS         = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-$Command    = "`"$PS`" -ExecutionPolicy Bypass -NoProfile -File `"$PsScript`" `"%1`""
+$PS      = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+$Command = "`"$PS`" -ExecutionPolicy Bypass -NoProfile -File `"$PsScript`" `"%1`""
 
-New-Item    -Path $MenuKey    -Force | Out-Null
-Set-ItemProperty -Path $MenuKey -Name '(Default)' -Value 'Open in MDPreview'
-
-New-Item    -Path $CommandKey -Force | Out-Null
-Set-ItemProperty -Path $CommandKey -Name '(Default)' -Value $Command
+# Use .NET Registry API directly — PowerShell's registry provider treats * as a
+# wildcard and would iterate thousands of keys instead of targeting the literal * key.
+$RegBase = 'Software\Classes\*\shell\Open in MDPreview'
+$MenuKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($RegBase)
+$MenuKey.SetValue('', 'Open in MDPreview')
+$MenuKey.Close()
+$CmdKey  = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey("$RegBase\command")
+$CmdKey.SetValue('', $Command)
+$CmdKey.Close()
 
 Write-Host ''
 Write-Host '[OK] Context menu entry added.'
