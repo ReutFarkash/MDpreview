@@ -15,13 +15,21 @@ Open any Markdown file in Obsidian — even files outside any vault — with a s
 2. Open the DMG and drag **MDPreview.app** to **Applications**
 3. Double-click MDPreview.app — it sets up `~/MDPreview` automatically on first run
 
-**First-run prompts — all expected, here's what to click:**
+**First-run prompts — all expected:**
 
-| Prompt | Action |
-|---|---|
-| *"MDPreview.app is downloaded from the Internet…"* | Click **Open** — Apple has scanned it and found no malicious software |
-| *"Would you like MDPreview to open .md files by default?"* | Click **Set as Default** to double-click open `.md` files. ⚠️ This dialog can appear behind Obsidian's window — if you don't see it, look behind the trust dialog below |
-| *"Do you trust the author of this vault?"* | Click **Trust author and enable plugins** |
+**1. Click Open** — Apple has already scanned it for malicious software.
+
+<img src="docs/screenshots/install-02-gatekeeper.png" width="340" alt="macOS Gatekeeper dialog asking to confirm opening MDPreview.app">
+
+**2. Click Set as Default** — lets you double-click `.md` files to open them in MDPreview.
+
+> ⚠️ This dialog can appear behind Obsidian's window. If you don't see it, look behind the trust prompt below.
+
+<img src="docs/screenshots/install-04-set-default-close.png" width="380" alt="MDPreview dialog asking to set as default .md opener">
+
+**3. Click Trust author and enable plugins** — required for the AnuPpuccin theme to load.
+
+<img src="docs/screenshots/install-03-trust-vault.png" width="520" alt="Obsidian dialog asking to trust the MDPreview vault author">
 
 To also get the Finder right-click action, clone the repo and run `bash install.sh`.
 

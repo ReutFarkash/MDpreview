@@ -193,7 +193,7 @@
       counter-increment: steps;
       display: flex;
       gap: 12px;
-      align-items: baseline;
+      align-items: flex-start;
       font-size: .9rem;
       color: var(--text-mid);
       text-align: left;
@@ -219,6 +219,22 @@
       font-size: .78rem;
       color: var(--text-faint);
       margin-top: 2px;
+      display: block;
+    }
+
+    .firstrun li > div {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .step-img {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(41,37,36,.08);
+      display: block;
     }
 
     /* ── DOWNLOAD ── */
@@ -333,13 +349,25 @@
   <section class="firstrun">
     <h2>First run</h2>
     <ol>
-      <li>Drag <strong>MDPreview.app</strong> to Applications, then double-click to open.<br>
-        <span class="warn">macOS will warn it was downloaded from the internet — click <strong>Open</strong>. Apple has scanned it.</span>
+      <li>
+        <div>
+          <strong>Click Open</strong> — Apple has already scanned it for malicious software.
+          <img src="screenshots/install-02-gatekeeper.png" alt="macOS Gatekeeper dialog" class="step-img">
+        </div>
       </li>
-      <li>A dialog asks: <em>"Would you like MDPreview to open .md files by default?"</em><br>
-        <span class="warn">Click <strong>Set as Default</strong>. It may appear behind Obsidian's window — look behind the trust prompt if you don't see it.</span>
+      <li>
+        <div>
+          <strong>Click Set as Default</strong> to open .md files by double-clicking.<br>
+          <span class="warn">May appear behind Obsidian's window — look behind the trust prompt if you don't see it.</span>
+          <img src="screenshots/install-04-set-default-close.png" alt="Set as Default dialog" class="step-img">
+        </div>
       </li>
-      <li>Obsidian opens and asks if you trust the vault — click <strong>Trust author and enable plugins</strong>.</li>
+      <li>
+        <div>
+          <strong>Click Trust author and enable plugins</strong> when Obsidian opens the vault.
+          <img src="screenshots/install-03-trust-vault.png" alt="Obsidian trust vault dialog" class="step-img">
+        </div>
+      </li>
     </ol>
   </section>
 
