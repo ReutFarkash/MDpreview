@@ -8,6 +8,8 @@
   <meta property="og:title" content="MDPreview — Open any Markdown file in Obsidian">
   <meta property="og:description" content="No vault required. Your Obsidian theme, your rendering, instantly.">
   <meta property="og:type" content="website">
+  <script data-goatcounter="https://mdpreviewgoat.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -216,8 +218,8 @@
         <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
       </a>
       <div class="nav-divider"></div>
-      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview.dmg" class="nav-dl" data-show="mac">Download</a>
-      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview-Windows.zip" class="nav-dl" data-show="win">Download</a>
+      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview.dmg" class="nav-dl" data-show="mac" onclick="window.goatcounter&&goatcounter.count({path:'download-mac',title:'Download macOS',event:true})">Download</a>
+      <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview-Windows.zip" class="nav-dl" data-show="win" onclick="window.goatcounter&&goatcounter.count({path:'download-win',title:'Download Windows',event:true})">Download</a>
     </div>
   </nav>
 
@@ -251,12 +253,12 @@
   <section class="download">
     <div data-show="mac">
       <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview.dmg"
-         class="btn-download" download>Download — Free</a>
+         class="btn-download" download onclick="window.goatcounter&&goatcounter.count({path:'download-mac',title:'Download macOS',event:true})">Download — Free</a>
       <p class="sub">macOS · Requires Obsidian</p>
     </div>
     <div data-show="win">
       <a href="https://github.com/ReutFarkash/MDpreview/releases/latest/download/MDPreview-Windows.zip"
-         class="btn-download" download>Download — Free</a>
+         class="btn-download" download onclick="window.goatcounter&&goatcounter.count({path:'download-win',title:'Download Windows',event:true})">Download — Free</a>
       <p class="sub">Windows 10+ · Requires Obsidian · No admin rights needed</p>
     </div>
   </section>
